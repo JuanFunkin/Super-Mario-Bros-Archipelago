@@ -6,9 +6,9 @@ BASE_ID = 0xADD000 + 0x1000
 WORLDS = range(8)   # 0-7 = World 1-8
 LEVELS = range(4)   # 0-3 = level 1-4 of each world
 
-MAX_COIN_CHECKS = 300    # generous cap on coin-milestone checks across a full 8-world run
+MAX_COIN_CHECKS = 64     # matches CoinCheckCount's upper range bound
 MAX_ONEUP_CHECKS = 15    # cap on "1-Up obtained in a level" checks
-MAX_KILL_CHECKS = 100    # generous cap on stomp-kill milestone checks
+MAX_KILL_CHECKS = 64     # matches KillCheckCount's upper range bound
 
 
 def level_location_name(world: int, level: int) -> str:
@@ -20,7 +20,9 @@ def no_hit_location_name(world: int, level: int) -> str:
 
 
 def build_location_table(coin_checks: bool, oneup_checks: bool,
-                          kill_checks: bool = False, no_hit_checks: bool = False) -> Dict[str, int]:
+                          kill_checks: bool = False, no_hit_checks: bool = False,
+                          coin_check_count: int = MAX_COIN_CHECKS,
+                          kill_check_count: int = MAX_KILL_CHECKS) -> Dict[str, int]:
     table: Dict[str, int] = {}
     code = BASE_ID
 
@@ -30,7 +32,7 @@ def build_location_table(coin_checks: bool, oneup_checks: bool,
             code += 1
 
     if coin_checks:
-        for i in range(MAX_COIN_CHECKS):
+        for i in range(coin_check_count):
             table[f"Coin Milestone #{i + 1}"] = code
             code += 1
 
@@ -40,7 +42,7 @@ def build_location_table(coin_checks: bool, oneup_checks: bool,
             code += 1
 
     if kill_checks:
-        for i in range(MAX_KILL_CHECKS):
+        for i in range(kill_check_count):
             table[f"Stomp Kill Milestone #{i + 1}"] = code
             code += 1
 
@@ -54,8 +56,11 @@ def build_location_table(coin_checks: bool, oneup_checks: bool,
 
 
 # "Full" table (every possible location) so Archipelago can display location
-# names even for a seed that doesn't use all of them.
-location_table: Dict[str, int] = build_location_table(True, True, True, True)
+# names even for a seed that doesn't use all of them. Uses the max possible
+# coin/kill check counts so every id that could ever be used is represented.
+location_table: Dict[str, int] = build_location_table(
+    True, True, True, True, MAX_COIN_CHECKS, MAX_KILL_CHECKS
+)
 
 LEVEL_TO_LOCATION = {
     (w, l): level_location_name(w, l) for w in WORLDS for l in LEVELS

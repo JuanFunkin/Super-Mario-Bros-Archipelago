@@ -19,6 +19,16 @@ class CoinCheckInterval(Range):
     default = 50
 
 
+class CoinCheckCount(Range):
+    """How many Coin Milestone checks exist in total, if Coin Checks is
+    enabled. They're spread out across the game's 32 levels (roughly one
+    every so many levels) instead of all being reachable from the start."""
+    display_name = "Coin Check Count"
+    range_start = 4
+    range_end = 64
+    default = 16
+
+
 class OneUpChecks(Toggle):
     """If enabled, getting an extra life (1-Up) inside a level (not the
     ones granted by the multiworld) also sends a check."""
@@ -50,16 +60,6 @@ class StarGating(Toggle):
     default = True
 
 
-class ButtonBGating(Toggle):
-    """If enabled, Mario's horizontal speed is softly capped to walking
-    pace until 'Progressive Button B' is received from the multiworld
-    (running requires holding B). This is a best-effort correction, not a
-    perfectly solid block -- brief bursts of extra speed may still slip
-    through between checks."""
-    display_name = "Button B Gating"
-    default = False
-
-
 class KillChecks(Toggle):
     """If enabled, stomping enemies also grants checks (every X stomp
     kills accumulated across the whole game, see kill_check_interval).
@@ -78,6 +78,16 @@ class KillCheckInterval(Range):
     default = 5
 
 
+class KillCheckCount(Range):
+    """How many Stomp Kill Milestone checks exist in total, if Kill Checks
+    is enabled. They're spread out across the game's 32 levels instead of
+    all being reachable from the start."""
+    display_name = "Kill Check Count"
+    range_start = 4
+    range_end = 64
+    default = 16
+
+
 class NoHitChecks(Toggle):
     """If enabled, clearing a level without ever losing your power-up
     (taking no damage) grants an extra check for that level."""
@@ -87,17 +97,12 @@ class NoHitChecks(Toggle):
 class Goal(Choice):
     """What you need to do to complete your goal.
     - beat_the_game: reach the end of World 8, same as usual.
-    - no_hit_run: reach the end without ever taking a single hit in ANY
-      level of the entire run. If you take damage at any point, the goal
-      won't trigger even once you reach the end -- you'd need a clean run
-      all the way through.
     - no_skips: reach the end having actually played through every single
       level -- skipping any of them via a warp zone means the goal won't
       trigger even if you reach the end."""
     display_name = "Goal"
     option_beat_the_game = 0
-    option_no_hit_run = 1
-    option_no_skips = 2
+    option_no_skips = 1
     default = 0
 
 
@@ -114,6 +119,15 @@ class LevelShuffle(Toggle):
     default = False
 
 
+class WarpShuffle(Toggle):
+    """EVEN MORE EXPERIMENTAL than Level Shuffle. If enabled, using a warp
+    zone pipe sends you to a random world instead of the one it would
+    normally take you to. This mechanism is less well understood than
+    regular level transitions, so it's more likely to have rough edges."""
+    display_name = "Warp Shuffle"
+    default = False
+
+
 class TrapLink(Toggle):
     """If enabled, any trap (Shrink Trap, Ice Trap, Death Trap) you receive
     is also triggered for every other player who also has Trap Link on."""
@@ -125,14 +139,16 @@ class SMB1Options(PerGameCommonOptions):
     goal: Goal
     coin_checks: CoinChecks
     coin_check_interval: CoinCheckInterval
+    coin_check_count: CoinCheckCount
     oneup_checks: OneUpChecks
     kill_checks: KillChecks
     kill_check_interval: KillCheckInterval
+    kill_check_count: KillCheckCount
     no_hit_checks: NoHitChecks
     mushroom_gating: MushroomGating
     fire_flower_gating: FireFlowerGating
     star_gating: StarGating
-    button_b_gating: ButtonBGating
     trap_link: TrapLink
     level_shuffle: LevelShuffle
+    warp_shuffle: WarpShuffle
     death_link: DeathLink

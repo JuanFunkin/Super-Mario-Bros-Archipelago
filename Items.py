@@ -14,7 +14,6 @@ item_table: Dict[str, SMB1ItemData] = {
     "Progressive Mushroom":  SMB1ItemData(BASE_ID + 0, ItemClassification.progression),
     "Progressive Fire Flower": SMB1ItemData(BASE_ID + 1, ItemClassification.progression),
     "Progressive Star": SMB1ItemData(BASE_ID + 6, ItemClassification.progression),
-    "Progressive Button B": SMB1ItemData(BASE_ID + 10, ItemClassification.progression),
 
     # --- Filler / useful ---
     "1-Up Mushroom":   SMB1ItemData(BASE_ID + 2, ItemClassification.filler),

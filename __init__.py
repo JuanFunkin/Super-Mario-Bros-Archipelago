@@ -6,6 +6,7 @@ from .Items import item_table, create_item
 from .Locations import location_table, build_location_table, WORLDS, LEVELS
 from .Regions import create_regions
 from .Options import SMB1Options
+from .Shuffle import build_shuffle_order
 from .Rom import SMB1Settings, SMB1ProcedurePatch
 from . import client  # noqa: F401  needed so patch_suffix (.apsmb1) gets registered
 
@@ -61,29 +62,9 @@ class SMB1World(World):
             self.level_shuffle_order = self._build_level_shuffle()
 
     def _build_level_shuffle(self) -> List[int]:
-        """Builds a random permutation of all 32 (world, level) slots,
-        encoded as world*4+level, that clearing a level sends you to (see
-        Level Shuffle option). World 8's castle (slot 31) always stays last,
-        as the real ending. Because of how the game's own code handles
-        finishing the 4th level of a world (it always forces a jump to some
-        world's 1st level, no matter what we write), every "world-ending"
-        slot in the shuffle must be immediately followed by a "world-start"
-        slot for the redirect to actually land correctly."""
-        enders = [w * 4 + 3 for w in range(7)]      # world-ending levels, excluding 8-4 itself
-        starters = [w * 4 + 0 for w in range(8)]    # world-starting levels
-        middles = [w * 4 + l for w in range(8) for l in (1, 2)]
-
-        self.random.shuffle(starters)
-        # pair each ender with a starter that must come right after it
-        blocks = [[enders[i], starters[i]] for i in range(len(enders))]
-        spare_starter = starters[len(enders):]  # exactly 1 left over (8 starters - 7 enders)
-
-        units = blocks + [[s] for s in spare_starter] + [[m] for m in middles]
-        self.random.shuffle(units)
-
-        sequence = [slot for unit in units for slot in unit]
-        sequence.append(7 * 4 + 3)  # 8-4 always last: the real ending
-        return sequence
+        # all the logic (and the reasons for its constraints) lives in
+        # Shuffle.py, which is unit-tested against the real ROM's tables
+        return build_shuffle_order(self.random)
 
     def create_regions(self) -> None:
         create_regions(self)
@@ -104,8 +85,6 @@ class SMB1World(World):
             ability_names.append("Progressive Fire Flower")
         if self.options.star_gating.value:
             ability_names.append("Progressive Star")
-        if self.options.button_b_gating.value:
-            ability_names.append("Progressive Button B")
 
         for name in ability_names:
             pool.append(self.create_item(name))
@@ -122,6 +101,8 @@ class SMB1World(World):
             self.options.oneup_checks.value,
             self.options.kill_checks.value,
             self.options.no_hit_checks.value,
+            self.options.coin_check_count.value,
+            self.options.kill_check_count.value,
         ))
 
         # Fill the rest with filler until it matches the number of locations
@@ -148,16 +129,18 @@ class SMB1World(World):
             "goal": self.options.goal.value,
             "coin_checks": self.options.coin_checks.value,
             "coin_check_interval": self.options.coin_check_interval.value,
+            "coin_check_count": self.options.coin_check_count.value,
             "oneup_checks": self.options.oneup_checks.value,
             "kill_checks": self.options.kill_checks.value,
             "kill_check_interval": self.options.kill_check_interval.value,
+            "kill_check_count": self.options.kill_check_count.value,
             "no_hit_checks": self.options.no_hit_checks.value,
             "mushroom_gating": self.options.mushroom_gating.value,
             "fire_flower_gating": self.options.fire_flower_gating.value,
             "star_gating": self.options.star_gating.value,
-            "button_b_gating": self.options.button_b_gating.value,
             "trap_link": self.options.trap_link.value,
             "level_shuffle": self.options.level_shuffle.value,
             "level_shuffle_order": self.level_shuffle_order,
+            "warp_shuffle": self.options.warp_shuffle.value,
             "death_link": self.options.death_link.value,
         }
